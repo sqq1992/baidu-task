@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>js关于二叉法的深度优先遍历和广度优先遍历</title>
+</head>
+<style>
+    *{margin: 0;padding: 0}
+    *{box-sizing: border-box;}
+
+    .one{
+        width: 1600px;
+        height: 500px;
+        margin: 100px auto;
+        border:1px solid #000;
+        display: flex;
+        display: -webkit-flex;
+        padding: 20px;
+        justify-content: space-between;
+        background: #fff;
+        flex-direction:column;
+        position: relative;
+    }
+
+    .two{
+        height: 214px;
+        border:1px solid red;
+        padding: 20px;
+        display: flex;
+        width: 900px;
+        display: -webkit-flex;
+        justify-content: space-between;
+        background: #fff;
+    }
+    .three{
+        height: 100%;
+        border:1px solid green;
+        padding: 20px;
+        display: flex;
+         width: 271px;
+        display: -webkit-flex;
+        justify-content: space-between;
+        background: #fff;
+    }
+
+    .four{
+        height: 100%;
+        border:1px solid blue;
+        padding: 20px;
+        display: flex;
+        display: -webkit-flex;
+        padding: 20px;
+        width: 35px;
+        justify-content: space-between;
+        background: #fff;
+    }
+
+</style>
+
+<body>
+
+<button type="button">深度优先遍历</button>
+<button type="button">广度优先遍历</button>
+
+
+<div class="one">
+    a
+    <div class="two">
+        b
+        <div class="three">
+            c
+            <div class="four">d</div>
+            <div class="four">e</div>
+            <div class="four">f</div>
+            <div class="four">g</div>
+        </div>
+        <div class="three">
+            h
+        </div>
+        <div class="three">
+            i
+            <div class="four">l</div>
+            <div class="four">m</div>
+        </div>
+    </div>
+    <div class="two">
+        o
+        <div class="three">
+            p
+            <div class="four">q</div>
+            <div class="four">r</div>
+            <div class="four">s</div>
+        </div>
+        <div class="three">
+            y
+            <div class="four">
+                u
+                <div class="five">v</div>
+            </div>
+            <div class="four">w</div>
+        </div>
+    </div>
+    <div class="two" style="display: block;position: absolute;width: 150px;height: 150px;right: 100px;top: 30px;">z</div>
+</div>
+
+<script>
+
+    var btns = document.getElementsByTagName("button");
+    var root = document.getElementsByClassName("one")[0];
+    var timer = null;       //动画的定时器
+
+    /**
+     * 深度优先遍历
+     * @param node
+     */
+    function deepSearch(node,nodeList){
+        if(node){
+            nodeList.push(node);
+            for(var i= 0,l = node.children.length;i<l;i++){
+                deepSearch(node.children[i], nodeList);
+            }
+        }
+    }
+
+    /**
+     * 为节点设置背景颜色
+     * @param arr
+     */
+    function changeBg(arr){
+        var i = 0;
+
+         timer = setInterval(function () {
+             if(i>=1){              //清除没被激活的背景颜色
+                 arr[i - 1].style.backgroundColor = "#fff";
+             }
+             if(i>=arr.length){
+                 clearInterval(timer);
+                 return false;
+             }
+             arr[i].style.backgroundColor = "blue";
+             i++;
+
+        }, 500);
+
+    }
+
+
+    //深度优先遍历
+    btns[0].onclick = function () {
+
+        var arry = [];
+        deepSearch(root, arry);
+
+        changeBg(arry);
+    };
+
+
+</script>
+
+
+</body>
+</html>
