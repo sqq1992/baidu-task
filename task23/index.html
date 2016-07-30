@@ -108,6 +108,7 @@
     var btns = document.getElementsByTagName("button");
     var root = document.getElementsByClassName("one")[0];
     var timer = null;       //动画的定时器
+    var widthIndex = 0;     //广度
 
     /**
      * 深度优先遍历
@@ -120,6 +121,20 @@
                 deepSearch(node.children[i], nodeList);
             }
         }
+    }
+
+    /**
+     *  广度优先遍历
+     **/
+    function widthSearch(node,nodList){
+
+        if(node){
+            nodList.push(node);
+            widthSearch(node.nextElementSibling, nodList);
+            node = nodList[widthIndex++];
+            widthSearch(node.firstElementChild, nodList);
+        }
+
     }
 
     /**
@@ -150,9 +165,18 @@
 
         var arry = [];
         deepSearch(root, arry);
-
         changeBg(arry);
     };
+
+    //广度优先遍历
+    btns[1].onclick = function () {
+
+        var arry = [];
+        widthSearch(root, arry);
+        changeBg(arry);
+
+    };
+
 
 
 </script>
