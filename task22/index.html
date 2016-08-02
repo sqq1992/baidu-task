@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>js关于二叉树的遍历</title>
+</head>
+<style>
+    *{margin: 0;padding: 0}
+    *{box-sizing: border-box;}
+
+    .one{
+        width: 980px;
+        height: 250px;
+        margin: 100px auto;
+        border:1px solid #000;
+        display: flex;
+        display: -webkit-flex;
+        padding: 20px;
+        justify-content: space-between;
+        background: #fff;
+    }
+
+    .two{
+        height: 100%;
+        border:1px solid red;
+        padding: 20px;
+        display: flex;
+        width: 400px;
+        display: -webkit-flex;
+        justify-content: space-between;
+        background: #fff;
+    }
+    .three{
+        height: 100%;
+        border:1px solid green;
+        padding: 20px;
+        display: flex;
+        width: 164px;
+        display: -webkit-flex;
+        justify-content: space-between;
+        background: #fff;
+    }
+
+    .four{
+        height: 100%;
+        border:1px solid blue;
+        padding: 20px;
+        display: flex;
+        display: -webkit-flex;
+        padding: 20px;
+        width: 35px;
+        justify-content: space-between;
+        background: #fff;
+    }
+
+</style>
+
+<body>
+
+    <div class="one">
+        <div class="two">
+            <div class="three">
+                <div class="four"></div>
+                <div class="four"></div>
+            </div>
+            <div class="three">
+                <div class="four"></div>
+                <div class="four"></div>
+            </div>
+        </div>
+        <div class="two">
+            <div class="three">
+                <div class="four"></div>
+                <div class="four"></div>
+            </div>
+            <div class="three">
+                <div class="four"></div>
+                <div class="four"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+
+        <button type="button" id="pre">前序</button>
+        <button type="button" id="center">中序</button>
+        <button type="button" id="later">后巡</button>
+
+    </div>
+
+
+    <script>
+        var pre = document.getElementById("pre");
+        var center = document.getElementById("center");
+        var later = document.getElementById("later");
+
+        var nodeArry = [];  //节点存放数组
+        var timer = null;   //定时器
+
+        var root = document.getElementsByClassName("one")[0];
+
+        /**
+         * 由前向后查找节点
+         * @param node
+         */
+        function preNode(node){
+
+            if(node!=null){
+                nodeArry.push(node);
+                preNode(node.firstElementChild);
+                preNode(node.lastElementChild);
+            }
+
+        }
+
+        function cetNode(node){
+            if(node!=null){
+                cetNode(node.firstElementChild);
+                nodeArry.push(node);
+                cetNode(node.lastElementChild);
+            }
+        }
+
+        function laterNode(node){
+            if(node!=null){
+                laterNode(node.firstElementChild);
+                laterNode(node.lastElementChild);
+                nodeArry.push(node);
+            }
+        }
+
+        //重置所有的查找数组
+        function reset(){
+            nodeArry = [];
+            clearInterval(timer);
+            var div = document.getElementsByTagName("div");
+            for(var i=0;i<div.length;i++){
+                div[i].style.backgroundColor = "#fff";
+            }
+        }
+
+        function resetColor(){
+            var div = document.getElementsByTagName("div");
+            for(var i=0;i<div.length;i++){
+                div[i].style.backgroundColor = "#fff";
+            }
+        }
+
+        /**
+         * 为节点设置定时背景颜色
+         * @param arry
+         */
+        function setColor(arry){
+            var i = 0;
+            timer = setInterval(function () {
+
+                if(i>=arry.length){
+                    resetColor();
+                    clearInterval(timer);
+                    return false;
+                }
+                resetColor();
+                arry[i].style.backgroundColor = "blue";
+                i++;
+            }, 500);
+
+
+        }
+
+        //前到后查找
+        pre.onclick = function () {
+            reset();
+            preNode(root);
+            setColor(nodeArry);
+
+        };
+
+        //
+        center.onclick = function () {
+            reset();
+            cetNode(root);
+            setColor(nodeArry);
+        };
+
+        later.onclick = function () {
+            reset();
+            laterNode(root);
+            setColor(nodeArry);
+        };
+
+
+    </script>
+
+</body>
+</html>
