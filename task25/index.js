@@ -4,15 +4,11 @@
 
     var Node = function (options) {
 
-        this.parentNode = options.parentNode;
-        this.allData = [];      //总数据信息
-
-        //当前寻找到的对象数据信息
-        this.currentFindArry = [];
-
-        //插入数据信息
-        this._addChild(this.allData, options);
-
+        this.parent = options.parent;                             //当前的父节点
+        this.childs = options.childs || [];                       //子数据信息
+        this.data = options.data;                                 //当前的文本内容
+        this.srcElement = options.srcElement;                     //当前的信息节点
+        this.srcElement.treeNode = this;                          //当前的信息节点的属性又指回这个对象
     };
 
     Node.prototype = {
@@ -36,50 +32,63 @@
 
         },
 
-        addChild:function(obj){
-            var current;
-            for(var i= 0,j=this.currentFindArry.length;i<j;i++){
-                current = this.currentFindArry[i];
+        deleteNode:function(){
+            var data = this.data;
+            var parentNode = this.parent.parentNode;
+            parentNode.removeChild(this.parent);
 
-                this._addChild(current.childs,{
-                    parentNode:current.element,
-                    data:obj.data
-                })
+            //todo delete删除不了this吗？
+            //delete this;
+            var label = parentNode.getElementsByClassName('label-node')[0];
+            var treeNode = label.treeNode;
+            var treeNodeChilds = treeNode.childs;
+            for(var i= 0;i<treeNodeChilds.length;i++){
+                if(treeNodeChilds[i].data===data){
+                    treeNodeChilds.splice(i, 1);
+                    i--;
+                }
             }
+
+            //如果子节点没了，父节点的样式要变化无箭头
+            if(treeNode.isEmptyChilds()){
+                treeNode.showEmpty();
+            }
+
+
         },
 
-        /**
-         * 插入对应的节点
-         * @param dataContainer 当前包裹的数据
-         * @param obj           当前插入的数据信息
-         */
-        _addChild:function(dataContainer,obj){
-            var newObj = {};
-            newObj.data = obj.data; //这个节点的名称
-            newObj.childs = [];     //存放子节点数据的容器
-            newObj.parentNode = obj.parentNode; //它的父节点
+        addChild:function(text){
 
-            //插入节点信息,并且返回对应的信息节点
-            var element = this.addNode(obj);
+            if(!text || text===""){
+                return this;
+            }
 
-            newObj.element = element;       //当前的信息节点
-            dataContainer.push(newObj);
-
-            //对当前的节点进行渲染样式,根据数据
-            this.render({
-                childs: newObj.childs,
-                currentNode: element
+            this._addNode({
+                parent:this.parent,
+                data:text
             });
 
+            //如果有子节点，则渲染有右箭头的样式
+            if(!this.isEmptyChilds()){
+                this.showDown();
+            }
+
+            //如果当前的节点处于展开状态的话,他的子节点显示
+            if(this.isNodeLoaf()){
+                this.childs[this.childs.length - 1].parent.className = "childnode";
+            }
+
+            return this;
         },
+
 
         /**
          * 插入真实节点
          * @param obj   传入的数据集合
          * @returns {Element}   返回当前的节点
          */
-        addNode:function(obj){
-            var parentNode = obj.parentNode,
+        _addNode:function(obj){
+            var parent = obj.parent,
                 text = obj.data;
 
             //创造对应的节点
@@ -90,7 +99,7 @@
             label.className = "label-node";
 
             var arrow = document.createElement('div');
-            arrow.className = "arrow arrow-down";
+            arrow.className = "arrow arrow-empty";
 
             var span = document.createElement('span');
             span.className = "root-title";
@@ -100,36 +109,97 @@
             img.src = "add.png";
             img.className = "img add";
 
+            var deleteimg = document.createElement('img');
+            deleteimg.src = "delete.png";
+            deleteimg.className = "img delete";
+
             //插入对应的节点
             label.appendChild(arrow);
             label.appendChild(span);
             label.appendChild(img);
+            label.appendChild(deleteimg);
             childNode.appendChild(label);
-            parentNode.appendChild(childNode);
+            parent.appendChild(childNode);
 
-            return childNode;
+            //在根节点的数组信息中插入一个新的子节点数据信息
+            this.childs.push(new Node({
+                parent:childNode,
+                data:text,
+                childs:[],
+                srcElement:label
+            }));
+
         },
 
-        findObjText:function(text){
-            this.currentFindArry = [];
-            var queryArry = this.allData.slice(0),
-                queryObj;
+        //显示当前有子节点的样式
+        showRight:function(){
+            this.srcElement.getElementsByClassName('arrow')[0].className = "arrow arrow-right";
+        },
 
-            //广度优先搜索
-            while(queryArry.length>0){
+        showDown:function(){
+            this.srcElement.getElementsByClassName('arrow')[0].className = "arrow arrow-down";
+        },
 
-                queryObj = queryArry.shift();
+        showEmpty:function(){
+            this.srcElement.getElementsByClassName('arrow')[0].className = "arrow arrow-empty";
+        },
 
-                //如果查找的数据在数组里有的话，则添加到搜索数组里
-                if(text==queryObj.data)this.currentFindArry.push(queryObj);
+        /**
+         * 当前的节点的是否有子节点
+         * @returns {boolean} 没有返回true 否则反之
+         */
+        isEmptyChilds:function(){
+            return this.childs.length === 0;
+        },
 
-                for(var i= 0,j=queryObj.childs.length;i<j;i++){
-                    queryArry.push(queryObj.childs[i]);
-                }
+        //当前的节点是否处于展开状态
+        isNodeLoaf:function(){
+            var arrow = this.srcElement.getElementsByClassName('arrow')[0];
+            var flag = true;        //true为显示字节点 否则反之
+            if(arrow.className==='arrow arrow-right'){
+                flag = false;
+            }else if(arrow.className==='arrow arrow-down'){
+                flag = true;
+            }
+            return flag;
+        },
+
+        //来回切换隐藏或者显示
+        toggle:function(){
+
+            //切换箭头的转化样式
+            var arrow = this.srcElement.getElementsByClassName('arrow')[0];
+
+            //如果是空白箭头，则直接返回
+            if(arrow.className==="arrow arrow-empty"){
+                return this;
+            }
+
+            var flag = this.isNodeLoaf();   //当前的节点是否处于展开状态
+            if(flag){
+                arrow.className = 'arrow arrow-right';
+            }else{
+                arrow.className = 'arrow arrow-down';
+            }
+
+            for(var i= 0,j=this.childs.length;i<j;i++){
+                this.childs[i].parent.className = flag?"childnode hide":"childnode";
             }
 
             return this;
         },
+
+        //直接切换到显示状态
+        toggleFloder:function(){
+            //切换箭头的转化样式
+            var arrow = this.srcElement.getElementsByClassName('arrow')[0];
+            arrow.className = 'arrow arrow-down';
+            for(var i= 0,j=this.childs.length;i<j;i++){
+                this.childs[i].parent.className = "childnode";
+            }
+
+            return this;
+        }
 
 
     };
@@ -140,13 +210,80 @@
 
 
 var node = new Node({
-    parentNode:document.getElementById('root'),
-    data:"前端技能大汇总"
-});
-node.findObjText('前端技能大汇总').addChild({
-    data:"编程语言"
-});
-node.findObjText('编程语言').addChild({
-    data:"javascript"
+    parent:document.getElementById('root'),
+    data:"前端技能大汇总",
+    childs:[],
+    srcElement:document.getElementsByClassName('label-node')[0]
 });
 
+//添加节点
+node.addChild('编程语言').addChild('构建工具').addChild('谈笑风生');
+node.childs[0].addChild('javascript').addChild('nodeJs').addChild('php').toggle();
+node.childs[1].addChild('gulp').addChild('grunt').addChild('webpack').toggle();
+node.childs[2].addChild('粉丝').addChild('沟里').addChild('长者').toggle();
+
+//绑定事件
+handleEvent(document.getElementById('root'), 'click', function (e) {
+    var target = e.target || e.srcElement,
+        targetClassName = target.className;
+
+    var parent = target.parentNode;
+
+    if(targetClassName.indexOf('root-title')>-1||targetClassName.indexOf('arrow')>-1){  //是否显示字节点
+        parent.treeNode.toggle();
+    }else if(targetClassName.indexOf('add')>-1){    //增加子节点
+        parent.treeNode.addChild(prompt('请输入节点的名称：'));
+    }else if(targetClassName.indexOf('delete')>-1){
+        parent.treeNode.deleteNode();
+    }
+
+
+});
+
+
+//绑定搜索事件
+handleEvent(document.getElementById('search'), 'click', function (e) {
+    var input = document.getElementById('text'),
+        text = input.value;
+
+    var searchArry = [];        //搜的的列表对象数组
+    var tempArry = [node];
+
+    var obj;
+    var saveArry = [];
+    //广度优先搜索
+    while(tempArry.length>0){
+
+        saveArry = [];
+        for(var i= 0;i<tempArry.length;i++){
+            obj = tempArry[i];
+            if(obj.data===text)searchArry.push(obj);
+            saveArry = saveArry.concat(obj.childs);
+            tempArry.splice(i, 1);
+            i--;
+        }
+
+        if(saveArry.length){
+            for(var i= 0,j=saveArry.length;i<j;i++){
+                tempArry.push(saveArry[i]);
+            }
+        }
+    }
+
+    if(searchArry.length){
+        var parent,
+            Node,
+            labelNode;
+        for(var i= 0,j=searchArry.length;i<j;i++){
+            Node = searchArry[i];
+            parent = Node.parent.parentNode;
+            while(parent){
+                labelNode = parent.getElementsByClassName("label-node")[0];
+                labelNode.treeNode.toggleFloder();
+                parent = parent.parentNode;
+            }
+        }
+    }
+
+
+});

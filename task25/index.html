@@ -10,11 +10,12 @@
 
 <fieldset id="box">
     <legend>树形结构</legend>
-    <input type="text" placeholder="输入查找或删除"/>
-    <button type="button">搜索</button>
+    <input type="text" placeholder="输入查找或删除" id="text"/>
+    <button type="button" id="search">搜索</button>
     <button type="button">清楚</button>
 
-    <div id="root">
+    <div id="root" class="childnode">
+        <label class="label-node"><div class="arrow arrow-empty"></div><span class="root-title">前端技能大汇总</span><img src="add.png" class="img add"></label>
         <!--<div class="childnode">-->
             <!--<label class="label-node">-->
                 <!--<div class="arrow arrow-down"></div>-->

@@ -57,6 +57,11 @@
 .childnode{
     margin: 6px 12px 6px 12px;
 }
+
+.hide{
+    display: none;
+}
+
 .label-node{
     display: block;
 }
