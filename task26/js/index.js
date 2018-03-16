@@ -139,7 +139,6 @@ requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimati
 
 })();
 
-
 //test
 var a = new DrawImg({});
 
